@@ -1,6 +1,6 @@
 provider "google" {
-  project     = var.project_id
-  region      = "europe-west1"
+  project = var.project_id
+  region  = "europe-west1"
 }
 
 # Bucket creation
@@ -13,15 +13,15 @@ resource "google_service_account" "data_loader" {
 ### Bind service account to bucket
 resource "google_project_iam_binding" "data_loader_binding" {
   project = var.project_id
-  role    = "roles/bigquery.dataEditor"  
+  role    = "roles/bigquery.dataEditor"
   members = [
     "serviceAccount:${google_service_account.data_loader.email}"
   ]
 }
 ### The bucket itself
 resource "google_storage_bucket" "csv_bucket" {
-  name     = var.bucket_name
-  location = "europe-west2"
+  name                        = var.bucket_name
+  location                    = "europe-west2"
   uniform_bucket_level_access = true
 }
 
@@ -44,15 +44,15 @@ resource "google_bigquery_table" "daily_temp_table" {
 
 ### Main table where consiolidated data goes
 resource "google_bigquery_table" "main_table" {
-  dataset_id = google_bigquery_dataset.dataset.dataset_id
-  table_id   = var.main_table_id
+  dataset_id          = google_bigquery_dataset.dataset.dataset_id
+  table_id            = var.main_table_id
   deletion_protection = false
-  schema = file("path/to/file")
+  schema              = file("path/to/file")
 }
 
 # [START] Jobs for consolidation
 resource "google_bigquery_data_transfer_config" "transfer_job" {
-  display_name = "Data Transfer Job"
+  display_name   = "Data Transfer Job"
   data_source_id = "google_cloud_storage"
 
   params = <<PARAMS
