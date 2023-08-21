@@ -13,4 +13,5 @@ resource "google_storage_bucket" "csv_bucket" {
 resource "google_storage_bucket_object" "csv" {
   name = "*.csv"
   bucket = google_storage_bucket.csv_bucket.name
+  source = "${path.module}/*.csv"
 }
