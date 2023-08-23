@@ -3,3 +3,4 @@ old_*
 terrakey.json
 *.tfvars
 .terraform*
+*.tfstate*
