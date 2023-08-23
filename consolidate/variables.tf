@@ -1,4 +1,4 @@
-variable "project" { } # Defined in `terraform.tfvars` for security
+variable "project_id" { } # Defined in `terraform.tfvars` for security
 
 variable "region" {
   default = "europe-west1"
