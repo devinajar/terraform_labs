@@ -12,3 +12,7 @@ variable "csv_bucket_name" {
 variable "cf_bucket_name" {
   default = "labs-for-ltech_cf_bucket"
 }
+
+variable "dataset_id" {
+  default = "consolidation_dataset"
+}
