@@ -16,3 +16,7 @@ variable "cf_bucket_name" {
 variable "dataset_id" {
   default = "consolidation_dataset"
 }
+
+variable "path_to_schema" {
+  default = "schema.json"
+}

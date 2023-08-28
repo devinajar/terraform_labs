@@ -59,23 +59,21 @@ resource "google_cloudfunctions2_function" "execute_transfer_job" {
 ### Dataset and tables
 resource "google_bigquery_dataset" "dataset" {
   dataset_id = var.dataset_id
+  location = var.region
 }
 
 resource "google_bigquery_table" "temp_table" {
-  dataset_id = google_bigquery_dataset.dataset.dataset_id
-  table_id   = "${var.project_id}_temp-table"
-
-  external_data_configuration {
-    source_format = "CSV"
-    autodetect    = true
-  }
+  dataset_id          = google_bigquery_dataset.dataset.dataset_id
+  table_id            = "${var.project_id}_temp-table"
+  schema              = file(var.path_to_schema)
+  deletion_protection = false
 }
 
 resource "google_bigquery_table" "consolidation_table" {
   dataset_id          = google_bigquery_dataset.dataset.dataset_id
   table_id            = "${var.project_id}_consolidation-table"
+  schema              = file(var.path_to_schema)
   deletion_protection = false
-  schema              = file("path/to/file") # CHANGE BEFORE APPLYING
 }
 
 resource "google_service_account" "datatransfer_service_account" {
@@ -85,7 +83,7 @@ resource "google_service_account" "datatransfer_service_account" {
 
 resource "google_project_iam_member" "data_transfer_premission" {
   role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "serviceAccount:${google_service-account.datatransfer_service_account.email}"
+  member  = "serviceAccount:${google_service_account.datatransfer_service_account.email}"
   project = var.project_id
 }
 
@@ -94,7 +92,7 @@ resource "google_pubsub_topic" "data_transfer_finished" {
 }
 
 resource "google_bigquery_data_transfer_config" "data_transfer_job" {
-  # ADD PERMISSIONS
+  depends_on                = [google_project_iam_member.data_transfer_premission]
   display_name              = "auto_transfer_job"
   location                  = var.region
   data_source_id            = "google_cloud_storage"
@@ -106,7 +104,7 @@ resource "google_bigquery_data_transfer_config" "data_transfer_job" {
     data_path_template             = "gs://${google_storage_bucket.csv_bucket.name}/*/{run_time|\"%Y-%m-%d\"}/*.csv.gz"
     file_format                    = "CSV"
     write_disposition              = "MIRROR"
-    detination_table_name_template = google_bigquery_table.temp_table
+    destination_table_name_template = google_bigquery_table.temp_table.table_id
     ignore_unknown_values          = "true"
     skip_leading_rows              = 1
   }
