@@ -25,6 +25,7 @@ resource "google_cloudfunctions2_function" "execute_transfer_job" {
 
   build_config {
     runtime = "python311"
+    entry_point = "execute_transfer_job"
     source {
       storage_source {
         bucket = google_storage_bucket.cloudfunctions_bucket.name
@@ -59,7 +60,7 @@ resource "google_cloudfunctions2_function" "execute_transfer_job" {
 ### Dataset and tables
 resource "google_bigquery_dataset" "dataset" {
   dataset_id = var.dataset_id
-  location = var.region
+  location   = var.region
 }
 
 resource "google_bigquery_table" "temp_table" {
@@ -101,11 +102,11 @@ resource "google_bigquery_data_transfer_config" "data_transfer_job" {
   notification_pubsub_topic = google_pubsub_topic.data_transfer_finished.id
 
   params = {
-    data_path_template             = "gs://${google_storage_bucket.csv_bucket.name}/*/{run_time|\"%Y-%m-%d\"}/*.csv.gz"
-    file_format                    = "CSV"
-    write_disposition              = "MIRROR"
+    data_path_template              = "gs://${google_storage_bucket.csv_bucket.name}/*/{run_time|\"%Y-%m-%d\"}/*.csv.gz"
+    file_format                     = "CSV"
+    write_disposition               = "MIRROR"
     destination_table_name_template = google_bigquery_table.temp_table.table_id
-    ignore_unknown_values          = "true"
-    skip_leading_rows              = 1
+    ignore_unknown_values           = "true"
+    skip_leading_rows               = 1
   }
 }
