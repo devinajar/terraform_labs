@@ -4,3 +4,5 @@ terrakey.json
 *.tfvars
 .terraform*
 *.tfstate*
+*lock*
+node_modules*
