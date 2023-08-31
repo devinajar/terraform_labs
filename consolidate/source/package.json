@@ -1,0 +1,9 @@
+{
+  "name": "nodejs-functions-gen2-codelab",
+  "version": "0.0.1",
+  "main": "index.js",
+  "dependencies": {
+    "@google-cloud/bigquery-data-transfer": "^4.0.0",
+    "@google-cloud/functions-framework": "^2.1.1"
+  }
+}
