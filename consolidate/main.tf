@@ -11,9 +11,9 @@ resource "google_storage_bucket" "cloudfunctions_bucket" {
 }
 
 resource "google_storage_bucket_object" "cf_source_file" {
-  name   = "cf_source_function.zip"
+  name   = "source.zip"
   bucket = google_storage_bucket.cloudfunctions_bucket.name
-  source = "./cf_source/cf_source_function.zip"
+  source = "./source/source.zip"
 }
 
 ### Cloud function triggered upon file upload
@@ -24,8 +24,8 @@ resource "google_cloudfunctions2_function" "execute_transfer_job" {
   description = "Executes the Data transfer job"
 
   build_config {
-    runtime = "python311"
-    entry_point = "execute_transfer_job"
+    runtime = "nodejs18"
+    entry_point = "quickstart"
     source {
       storage_source {
         bucket = google_storage_bucket.cloudfunctions_bucket.name
