@@ -15,15 +15,15 @@ functions.cloudEvent('loadCSVFromGCS', event => {
   const filename = event.data.name;
 
   // Variables for the Dataset and table where the data will be loaded
-  const datasetId = 'myDataset'; // >>> REPLACE WITH VARIABLE
-  const tableId = 'tableId'; // >>> REPLACE WITH VARIABLE
+  const datasetId = process.env.DATASET_ID;
+  const tableId = process.env.TABLE_ID;
 
   // Data loading job configuration
   // Omitting schema since it's already declared in the destination table
   const metadata = {
     sourceFormat: 'CSV',
     skipLeadingRows: 1,
-    location: 'europe-west1', // >>> REPLACE WITH VARIABLE
+    location: process.env.REGION,
     // Set the write disposition to overwrite existing table data.
     writeDisposition: 'WRITE_TRUNCATE',
   };
