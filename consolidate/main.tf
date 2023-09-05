@@ -25,7 +25,7 @@ resource "google_cloudfunctions2_function" "execute_transfer_job" {
 
   build_config {
     runtime     = "nodejs18"
-    entry_point = "quickstart"
+    entry_point = "loadCSVFromGCS"
     source {
       storage_source {
         bucket = google_storage_bucket.cloudfunctions_bucket.name
@@ -54,6 +54,11 @@ resource "google_cloudfunctions2_function" "execute_transfer_job" {
     min_instance_count               = 0
     timeout_seconds                  = 540
     # service_account_email            = google_service_account.cloud_function_sa.email
+    environment_variables = {
+      TABLE_ID   = "${google_bigquery_table.temp_table.table_id}",
+      DATASET_ID = "${google_bigquery_dataset.dataset.id}",
+      REGION     = "${var.region}"
+    }
   }
 }
 
