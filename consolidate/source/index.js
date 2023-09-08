@@ -15,7 +15,8 @@ functions.cloudEvent('loadCSVFromGCS', event => {
   const filename = event.data.name;
 
   // Variables for the Dataset and table where the data will be loaded
-  const datasetId = process.env.DATASET_ID;
+  const datasetPath = process.env.DATASET_ID.split("/"); 
+  const datasetId = datasetPath[datasetPath.length -1];
   const tableId = process.env.TABLE_ID;
 
   // Data loading job configuration
@@ -27,20 +28,23 @@ functions.cloudEvent('loadCSVFromGCS', event => {
     // Set the write disposition to overwrite existing table data.
     writeDisposition: 'WRITE_TRUNCATE',
   };
-
+  
   // Job to load data from a GCS into a table
-  const [job] = bigquery
+  bigquery
   .dataset(datasetId)
   .table(tableId)
   .load(storage.bucket(bucketName).file(filename), metadata)
   .then(() => {
     // load() waits for the job to finish
-    console.log(`Job ${job.id} completed`);
-  });
+    console.log(`Loaded ${filename} to ${datasetId}.${tableId}`);
+  })
+  .catch(err =>{
+    console.log('Error loading file into BigQuery:', err);
+  })
 
   // Check the job status for errors
-  const errors = job.status.errors;
+  /* const errors = job.status.errors;
   if (errors && errors.length > 0) {
     throw errors;
-  }
+  } */
 });
