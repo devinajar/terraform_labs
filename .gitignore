@@ -6,3 +6,4 @@ terrakey.json
 *.tfstate*
 *lock*
 node_modules*
+schema.json
