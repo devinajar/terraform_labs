@@ -6,11 +6,11 @@ variable "region" {
 }
 
 variable "csv_bucket_name" {
-  default = "labs-for-ltech_csv_bucket"
+  default = "csv_bucket"
 }
 
 variable "cf_bucket_name" {
-  default = "labs-for-ltech_cf_bucket"
+  default = "cf_bucket"
 }
 
 variable "dataset_id" {

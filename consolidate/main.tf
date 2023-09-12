@@ -1,12 +1,12 @@
 ### The bucket for the csv
 resource "google_storage_bucket" "csv_bucket" {
-  name     = var.csv_bucket_name
+  name     = "${var.project_id}-${var.csv_bucket_name}"
   location = var.region
 }
 
 ### The bucket for the cloud function
 resource "google_storage_bucket" "cloudfunctions_bucket" {
-  name     = var.cf_bucket_name
+  name     = "${var.project_id}-${var.cf_bucket_name}"
   location = var.region
 }
 
