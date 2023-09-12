@@ -41,10 +41,4 @@ functions.cloudEvent('loadCSVFromGCS', event => {
   .catch(err =>{
     console.log('Error loading file into BigQuery:', err);
   })
-
-  // Check the job status for errors
-  /* const errors = job.status.errors;
-  if (errors && errors.length > 0) {
-    throw errors;
-  } */
 });
