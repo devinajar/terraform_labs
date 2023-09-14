@@ -18,6 +18,7 @@ resource "google_storage_bucket_object" "cf_source_file" {
 
 ### Cloud function triggered upon file upload
 resource "google_cloudfunctions2_function" "execute_transfer_job" {
+  depends_on  = [google_bigquery_data_transfer_config.data_transfer_job]
   project     = var.project_id
   name        = "execute_transfer_job"
   location    = var.region
@@ -25,7 +26,7 @@ resource "google_cloudfunctions2_function" "execute_transfer_job" {
 
   build_config {
     runtime     = "nodejs18"
-    entry_point = "loadCSVFromGCS"
+    entry_point = "startDataTransfer"
     source {
       storage_source {
         bucket = google_storage_bucket.cloudfunctions_bucket.name
@@ -55,9 +56,9 @@ resource "google_cloudfunctions2_function" "execute_transfer_job" {
     timeout_seconds                  = 540
     # service_account_email            = google_service_account.cloud_function_sa.email
     environment_variables = {
-      TABLE_ID   = "${google_bigquery_table.temp_table.table_id}",
-      DATASET_ID = "${google_bigquery_dataset.dataset.id}",
-      REGION     = "${var.region}"
+      PROJECT_ID  = "${var.project_id}",
+      TRANSFER_ID = "${google_bigquery_data_transfer_config.data_transfer_job.id}"
+      REGION      = "${var.region}"
     }
   }
 }
@@ -80,4 +81,41 @@ resource "google_bigquery_table" "consolidation_table" {
   table_id            = "${var.project_id}_consolidation-table"
   schema              = file(var.path_to_schema)
   deletion_protection = false
+}
+
+resource "google_service_account" "datatransfer_service_account" {
+  account_id   = "dataset-service-account"
+  display_name = "Dataset Service Account"
+}
+
+resource "google_project_iam_member" "data_transfer_premission" {
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${google_service_account.datatransfer_service_account.email}"
+  project = var.project_id
+}
+
+resource "google_storage_bucket_iam_binding" "adjust-rosseca-binding" {
+  bucket = google_storage_bucket.csv_bucket.name
+  role   = "roles/storage.admin"
+  members = [
+    "serviceAccount:${google_service_account.datatransfer_service_account.email}"
+  ]
+}
+
+resource "google_bigquery_data_transfer_config" "data_transfer_job" {
+  depends_on             = [google_project_iam_member.data_transfer_premission]
+  display_name           = "auto_transfer_job"
+  location               = var.region
+  data_source_id         = "google_cloud_storage"
+  destination_dataset_id = google_bigquery_dataset.dataset.dataset_id
+  service_account_name   = google_service_account.datatransfer_service_account.email
+
+  params = {
+    data_path_template              = "gs://${google_storage_bucket.csv_bucket.name}/*.csv"
+    file_format                     = "CSV"
+    write_disposition               = "APPEND"
+    destination_table_name_template = google_bigquery_table.temp_table.table_id
+    ignore_unknown_values           = "true"
+    skip_leading_rows               = 1
+  }
 }
